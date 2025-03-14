@@ -2,11 +2,11 @@
 local wezterm = require 'wezterm'
 
 -- Utility functions
-local window_background_opacity = 0.95
-local function toggle_window_background_opacity(window)
+local window_background_opacity = 1 -- Opacity for terminal window background
+local function toggle_window_background_opacity(window) -- Toggle window background opacity
     local overrides = window:get_config_overrides() or {}
     if not overrides.window_background_opacity then
-        overrides.window_background_opacity = 1.0
+        overrides.window_background_opacity = 0.95 
     else
         overrides.window_background_opacity = nil
     end
@@ -14,10 +14,11 @@ local function toggle_window_background_opacity(window)
 end
 wezterm.on("toggle-window-background-opacity", toggle_window_background_opacity)
 
-local function toggle_ligatures(window)
-  local overrides = window:get_config_overrides() or {}
+local function toggle_ligatures(window) -- Toggle ligatures
+  local overrides = window:get_config_overrides() or {} 
   if not overrides.harfbuzz_features then
-    overrides.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
+    overrides.harfbuzz_features = { 'calt', 'liga', 'clig', 'dlig' } -- Enables all ligatures
+
   else
     overrides.harfbuzz_features = nil
   end
@@ -30,9 +31,9 @@ local function color_scheme_for_appearance(appearance)
   if appearance:find "Dark" then
     return "Catppuccin Mocha"
   else
-    return "Catppuccino latte"
+    return "Catppuccin Latte"
   end
-end
+end 
 
 -- Initialize actual config
 local config = {}
@@ -41,6 +42,7 @@ if wezterm.config_builder then
 end
 
 -- Appearance
+config.font = wezterm.font("Fira Code", { weight = "Regular" })
 config.font_size = 14.0
 config.color_scheme = color_scheme_for_appearance(wezterm.gui.get_appearance())
 config.window_background_opacity = window_background_opacity
