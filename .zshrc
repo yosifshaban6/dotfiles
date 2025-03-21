@@ -1,104 +1,129 @@
-# ==============================
-# 🚀 Oh My Posh + Znap Config
-# ==============================
-
-# 🔹 Load Oh My Posh (Change theme as needed)
-eval "$(oh-my-posh init zsh --config ~/.poshthemes/robbyrussell.omp.json)"
-
-# 🔹 Load Znap
-source ~/.zsh-snap/znap.zsh
-
-# ==============================
-# 📌 Plugins (Fast & Lazy Loaded)
-# ==============================
-
-# Install Plugins (Runs once)
-if [[ ! -f ~/.zsh_plugins.znap ]]; then
-  znap install \
-    zsh-users/zsh-syntax-highlighting \
-    zsh-users/zsh-autosuggestions \
-    zsh-users/zsh-completions \
-    Aloxaf/fzf-tab
+# ========================================
+# 🚀 Powerlevel10k Instant Prompt (Must be First)
+# ========================================
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Load Plugins
-znap source zsh-users/zsh-syntax-highlighting
-znap source zsh-users/zsh-autosuggestions
-znap source zsh-users/zsh-completions
-znap source Aloxaf/fzf-tab
+# ========================================
+# ⚡ Znap Plugin Manager Setup
+# ========================================
+[[ -f ~/.zsh-snap/znap.zsh ]] && source ~/.zsh-snap/znap.zsh 2>/dev/null
 
-# Fast Startup
-znap compile
 
-# ==============================
-# 🎯 Keybindings & History
-# ==============================
+# ========================================
+# 🔧 Deferred Initializations
+# ========================================
+function _init_plugins() {
+  # Load plugins asynchronously
+  znap source romkatv/powerlevel10k
+  znap source jeffreytse/zsh-vi-mode
+  znap source zsh-users/zsh-syntax-highlighting
+  znap source zsh-users/zsh-completions
+  znap source zsh-users/zsh-autosuggestions
+  znap source Aloxaf/fzf-tab
 
+  # Oh My Zsh snippets
+  local omz_plugins=(
+    git
+    sudo
+    kubectl
+    kubectx
+    command-not-found
+    tmux
+  )
+  for plugin in $omz_plugins; do
+    znap source ohmyzsh/ohmyzsh "plugins/$plugin"
+  done
+}
+
+# ========================================
+# 🎨 Powerlevel10k Configuration
+# ========================================
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# ========================================
+# ⌨️ Keybindings
+# ========================================
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey '^[w' kill-region
 
-# History Settings
-HISTSIZE=5000
+# ========================================
+# 📜 History Configuration
+# ========================================
+HISTSIZE=10000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
-HISTDUP=erase
-setopt appendhistory sharehistory
-setopt hist_ignore_space hist_ignore_all_dups hist_save_no_dups hist_ignore_dups hist_find_no_dups
+setopt HIST_FCNTL_LOCK
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt SHARE_HISTORY
 
-# ==============================
-# 🔧 Aliases
-# ==============================
+# ========================================
+# 🔍 Completion & FZF Configuration
+# ========================================
+autoload -Uz compinit && compinit -C
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
 
+# ========================================
+# 🏷️ Aliases
+# ========================================
 alias vim='nvim'
 alias c='clear'
 alias open="xdg-open"
 alias wezterm='flatpak run org.wezfurlong.wezterm'
 
-# eza Aliases
-alias ls='eza --icons'
-alias ll='eza -l --icons'
-alias la='eza -la --icons'
-alias lt='eza -T --icons'
-alias lr='eza -l --reverse --icons'
-alias lS='eza -l --sort=size --icons'
-alias le='eza -l --sort=ext --icons'
-alias l1='eza -1'
-alias ld='eza -ld --icons'
-alias lf='eza -l --icons | grep "^-" '
-alias ldot='eza -ld .* --icons'
-alias lg='eza -l --git --icons'
-alias lgf='eza -l --git --icons | grep "^-" '
-alias lmod='eza -l --sort=modified --icons'
+# eza aliases with existence checks
+if command -v eza >/dev/null; then
+  alias ls='eza --icons'
+  alias ll='eza -l --icons'
+  alias la='eza -la --icons'
+  alias lt='eza -T --icons'
+  alias lr='eza -l --reverse --icons'
+  alias lS='eza -l --sort=size --icons'
+  alias le='eza -l --sort=ext --icons'
+  alias l1='eza -1'
+  alias ld='eza -ld --icons'
+  alias lf='eza -l --icons | grep "^-" '
+  alias ldot='eza -ld .* --icons'
+  alias lg='eza -l --git --icons'
+  alias lgf='eza -l --git --icons | grep "^-" '
+  alias lmod='eza -l --sort=modified --icons'
+fi
 
-# ==============================
-# 🔄 Shell Integrations
-# ==============================
+# ========================================
+# 📌 Shell Integrations (Silenced)
+# ========================================
+if [[ -n "$PS1" ]]; then
+  eval "$(fzf --zsh 2>/dev/null)"
+  eval "$(zoxide init --cmd cd zsh 2>/dev/null)"
+fi
 
-eval "$(fzf --zsh)"
-eval "$(zoxide init --cmd cd zsh)"
-
-# ==============================
-# 🐍 Conda (if needed)
-# ==============================
-
+# ========================================
+# 🐍 Conda Initialization (Silenced)
+# ========================================
 __conda_setup="$('/home/youssef/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
+elif [ -f "/home/youssef/anaconda3/etc/profile.d/conda.sh" ]; then
+    . "/home/youssef/anaconda3/etc/profile.d/conda.sh" >/dev/null 2>&1
 else
-    if [ -f "/home/youssef/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/youssef/anaconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/youssef/anaconda3/bin:$PATH"
-    fi
+    export PATH="/home/youssef/anaconda3/bin:$PATH"
 fi
 unset __conda_setup
 
-# ==============================
-# 🎯 Node Version Manager (NVM)
-# ==============================
-
+# ========================================
+# 🎯 NVM Setup (Silenced)
+# ========================================
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use >/dev/null 2>&1
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" >/dev/null 2>&1
+
+# ========================================
+# ⚡ Defer Plugin Loading
+# ========================================
+_init_plugins
