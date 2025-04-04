@@ -8,7 +8,10 @@ fi
 # ========================================
 # ⚡ Znap Plugin Manager Setup
 # ========================================
-[[ -f ~/.zsh-snap/znap.zsh ]] && source ~/.zsh-snap/znap.zsh 2>/dev/null
+[[ -r ~/Repos/znap/znap.zsh ]] ||
+    git clone --depth 1 -- \
+        https://github.com/marlonrichert/zsh-snap.git ~/Repos/znap
+source ~/Repos/znap/znap.zsh  # Start Znap
 
 
 # ========================================
@@ -72,7 +75,6 @@ zstyle ':completion:*' menu no
 # ========================================
 # 🏷️ Aliases
 # ========================================
-alias vim='nvim'
 alias c='clear'
 alias open="xdg-open"
 alias wezterm='flatpak run org.wezfurlong.wezterm'
@@ -94,6 +96,41 @@ if command -v eza >/dev/null; then
   alias lgf='eza -l --git --icons | grep "^-" '
   alias lmod='eza -l --sort=modified --icons'
 fi
+
+# Instant prompt preamble for Powerlevel10k (if you use it)
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Function to generate Flatpak aliases
+generate_flatpak_aliases() {
+  # Check if flatpak is installed silently
+  if ! command -v flatpak &> /dev/null; then
+    return
+  fi
+
+  # Get the list of Flatpak apps and process it silently
+  flatpak list --app --columns=name,application 2>/dev/null | while read -r name app_id; do
+    # Skip the header line
+    if [[ "$name" == "Name" ]]; then
+      continue
+    fi
+
+    # Convert name to lowercase and remove spaces for a clean command
+    cmd_name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+
+    # Create the alias if it doesn't already exist as a command
+    if ! command -v "$cmd_name" &> /dev/null; then
+      alias "$cmd_name"="flatpak run $app_id"
+    fi
+  done
+}
+
+# Run the function after instant prompt
+generate_flatpak_aliases
+
+# Your Powerlevel10k configuration (if it exists)
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # ========================================
 # 📌 Shell Integrations (Silenced)
@@ -120,7 +157,7 @@ unset __conda_setup
 # 🎯 NVM Setup (Silenced)
 # ========================================
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use >/dev/null 2>&1
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  >/dev/null 2>&1
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" >/dev/null 2>&1
 
 # ========================================
