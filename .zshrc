@@ -141,20 +141,36 @@ if [[ -n "$PS1" ]]; then
 fi
 
 # ========================================
-# 🐍 Conda Initialization (Silenced)
+# 🐍 Conda Manual Initialization
 # ========================================
-__conda_setup="$('/home/youssef/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-elif [ -f "/home/youssef/anaconda3/etc/profile.d/conda.sh" ]; then
-    . "/home/youssef/anaconda3/etc/profile.d/conda.sh" >/dev/null 2>&1
-else
-    export PATH="/home/youssef/anaconda3/bin:$PATH"
-fi
-unset __conda_setup
+function init_conda() {
+  if [[ -z "$CONDA_INITIALIZED" ]]; then
+    echo "🐍 Initializing Conda environment..."
+    __conda_setup="$('/home/youssef/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
+    else
+        if [ -f "/home/youssef/anaconda3/etc/profile.d/conda.sh" ]; then
+            . "/home/youssef/anaconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="/home/youssef/anaconda3/bin:$PATH"
+        fi
+    fi
+    unset __conda_setup
+    export CONDA_INITIALIZED=1
+    echo "✅ Conda initialized successfully! You can now use conda commands."
+  else
+    echo "✅ Conda is already initialized in this session."
+  fi
+}
 
-# ========================================
-# 🎯 NVM Setup (Silenced)
+# Add conda to PATH without activating
+export PATH="/home/youssef/anaconda3/bin:$PATH"
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+
 # ========================================
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  >/dev/null 2>&1
@@ -164,3 +180,7 @@ export NVM_DIR="$HOME/.nvm"
 # ⚡ Defer Plugin Loading
 # ========================================
 _init_plugins
+
+# Your conda environment is NOT automatically initialized
+# Use 'init_conda' command when you need to work with conda
+
