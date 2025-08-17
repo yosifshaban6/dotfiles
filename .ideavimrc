@@ -1,0 +1,38 @@
+" Set leader key
+let mapleader = " "
+set relativenumber
+
+" Tabs
+nnoremap H :action PreviousTab<CR>
+nnoremap L :action NextTab<CR>
+nnoremap Q :action CloseContent<CR>
+
+" Splits
+nnoremap | :action SplitVertically<CR>
+nnoremap _ :action SplitHorizontally<CR>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" File Search
+nnoremap <leader>p :action GotoFile<CR>
+nnoremap <leader>s :action GotoSymbol<CR>
+nnoremap <leader>f :action FindInPath<CR>
+
+" Git
+nnoremap <leader>gp :action Vcs.ShowTabbedFileHistory<CR>
+nnoremap <leader>gr :action ChangesView.Rollback<CR>
+nnoremap <leader>gj :action Vcs.NextChange<CR>
+nnoremap <leader>gk :action Vcs.PrevChange<CR>
+
+" Sidebar, Terminal
+nnoremap <leader>e :action HideAllWindows<CR>:action ActivateProjectToolWindow<CR>
+nnoremap <leader>t :action ActivateTerminalToolWindow<CR>
+
+" Peek/Definition
+nnoremap gp :action ShowUsages<CR>
+nnoremap gi :action GotoImplementation<CR>
+nnoremap gq :action ShowIntentionActions<CR>
+nnoremap gt :action GotoTypeDeclaration<CR>
+

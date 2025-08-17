@@ -78,7 +78,7 @@ zstyle ':completion:*' menu no
 alias c='clear'
 alias open="xdg-open"
 alias wezterm='flatpak run org.wezfurlong.wezterm'
-
+alias cursor='/opt/cursor/cursor.AppImage'
 # eza aliases with existence checks
 if command -v eza >/dev/null; then
   alias ls='eza --icons'
@@ -184,3 +184,13 @@ _init_plugins
 # Your conda environment is NOT automatically initialized
 # Use 'init_conda' command when you need to work with conda
 
+
+# pnpm
+export PNPM_HOME="/home/youssef/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+export QT_QPA_PLATFORMTHEME=qt5ct
